@@ -1,5 +1,7 @@
 class UsersController < ApplicationController
   #before_action :set_user, only: [:show, :update, :destroy]
+  respond_to :json
+  #skip_before_filter  :verify_authenticity_token
 
   # GET /users
   # GET /users.json
@@ -12,7 +14,9 @@ class UsersController < ApplicationController
   # GET /users/1.json
   def show
     if User.exists?(id:params[:id])
+      #respond_with = user;
       user = User.find(params[:id])
+      #respond_with = user;
       render json: user, status: :ok
     else
       render json: {error: "Usuario no encontrado"}, status:404
@@ -37,13 +41,17 @@ class UsersController < ApplicationController
   # PATCH/PUT /users/1
   # PATCH/PUT /users/1.json
   def update
-   user = User.find(params[:id])
-
-   if user.update(user_params)
-     render json: user, status: 200
+   if User.exists?(id:params[:id])
+     user = User.find(params[:id])
+     if user.update(user_params)
+       render json: user, status: 200
+     else
+       render json: { errors: user.errors }, status: 422
+     end
    else
-     render json: { errors: user.errors }, status: 422
+     render json: {error: "Usuario no encontrado"}, status:404
    end
+
  end
 
   # DELETE /users/1
