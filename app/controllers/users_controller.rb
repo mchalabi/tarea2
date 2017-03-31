@@ -5,20 +5,15 @@ class UsersController < ApplicationController
   # GET /users.json
   def index
     users = User.all
-    message = {'usuarios' => users, 'total'=> users.count}.to_json
-    render json: message, status: :ok
+    render json: {'usuarios' => users, 'total'=> users.count}.to_json, status: :ok
   end
 
   # GET /users/1
   # GET /users/1.json
-  #def show
-    #render json: @user
-  #end
-
   def show
     if User.exists?(id:params[:id])
       user = User.find(params[:id])
-      render json: user
+      render json: user, status: :ok
     else
       render json: {error: "Usuario no encontrado"}, status:404
     end
@@ -42,20 +37,22 @@ class UsersController < ApplicationController
   # PATCH/PUT /users/1
   # PATCH/PUT /users/1.json
   def update
-    if @user.update(user_params)
-      head :no_content
-    else
-      render json: @user.errors, status: :unprocessable_entity
-    end
-  end
+   user = User.find(params[:id])
+
+   if user.update(user_params)
+     render json: user, status: 200
+   else
+     render json: { errors: user.errors }, status: 422
+   end
+ end
 
   # DELETE /users/1
   # DELETE /users/1.json
   def destroy
     if User.exists?(id:params[:id])
-      @user = User.find(params[:id])
-      @user.destroy
-      head :no_content
+      user = User.find(params[:id])
+      user.destroy
+      head 204
     else
       render json: {error: "Usuario no encontrado"}, status:404
     end
@@ -63,15 +60,15 @@ class UsersController < ApplicationController
 
   def set_user
     if User.exists?(id: params[:id])
-      @user = User.find(params[:id])
+      user = User.find(params[:id])
     else
-      @user = nil
+      user = nil
     end
   end
 
     # Never trust parameters from the scary internet, only allow the white list through.
   def user_params
-    params.permit(:nombre, :apellido, :usuario, :twitter)
+    params.require(:user).permit(:nombre, :apellido, :usuario, :twitter)
   end
 
 end
